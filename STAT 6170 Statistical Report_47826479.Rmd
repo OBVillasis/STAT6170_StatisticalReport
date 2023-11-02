@@ -23,6 +23,7 @@ library(gridExtra)
 
 \section{Abstract}
 
+This study investigates whether there is a significant difference in the albedos of stoaches and whether the weight and territories stoaches occupy are significantly related using a comparative-correlational study design. To test these hypotheses, a sample of 255 stoaches grouped according to striped or spotted were studied. Their albedos, weights, and territories occupied were collected and subjected to hypotheses testing. A t-test for independence with equal variance was used and revealed that the albedos of spotted and striped stoaches do not significantly differ from each other. Furthermore, the statistical analysis using linear regression method showed that a significant linear relationship between weight and territories of stoaches grouped by species (striped and spotted) and that the territory a stoach occupy can be predicted using its weight. 
 
 
 \section {Introduction}
@@ -54,6 +55,8 @@ All computations for the descriptive and inferential testing, including the mnod
 
 ## Preliminary Data Exploration
 
+For the preliminary data exploration, the stoaches were grouped into species as spotted or striped. Of the 255 stoaches sampled, 131 were spotted and 124 were striped. Spotted stoaches revealed a mean albedo of 33.51 with a standard deviation of 5.79. The striped stoaches reported a little higher mean albedo of 33.69 and a little varied data with a standard deviation of 6.80 compared to the spotted stoaches. Striped stoaches are relatively more varied in albedo (Min =18.65, Max = 52.40) with a range of 33.75 compared to  spotted stoaches with a range of 30.38 (Min =19.64, Max = 50.02) (Table 1).
+
 
 ```{r, echo=FALSE}
 #Import the data from Excel
@@ -63,7 +66,6 @@ data <- read_csv("47826479_data_StatReport.csv")
 spotted_data <- subset(data, species == "Spotted")
 striped_data <- subset(data, species == "Striped")
 ```
-
 
 
 ```{r, echo=FALSE, results='asis'}
@@ -80,12 +82,18 @@ summary_stats <- data %>%
     Range = Max - Min
   )
 
-knitr::kable(summary_stats, caption = "Descriptive Summary Table of Stoaches Grouped by Species")
+knitr::kable(summary_stats, caption = "Descriptive Summary Table of the Albedo of Stoaches Grouped by Species")
 ```
 
 
 
-```{r, echo=FALSE}
+
+
+
+Taking note that the spotted and striped stoaches are independent groups, we ought to examine normality and homogeneity of variances. To check assumptions of normality and equality of variance in the albedos of striped and spotted stoaches, the histograms and boxplots were examined, respectively. For both spotted and striped stoaches, histograms seem to follow the normal distribution. Checking closely the boxplots for the albedos for both groups of stoaches, the dispersion of the albedos seem to be closely similar. In addition to the histograms, normality of data were also examined using the Shapiro-Wilk normality test. For the albedos of both striped (W = 0.98816, p-value = 0.3611) and spotted (W = 0.99535, p-value = 0.9496) stoaches, the Shapiro-Wilk test reported insignificant results, p-values both greater than 0.05 (Appendix 1). In addition to the boxplots, the equality of variance for both groups was also verified using the Levene's test that showed an F-value of 2.0427 with a p-value of 0.1542. The p-value of 0.1542 which is greater than 0.05 signifies homogeneity of variance in the albedos between striped and spotted stoaches.
+
+
+```{r, echo=FALSE, fig.height=3}
 # Assign the histogram to a variable
 hist_plot <- ggplot(data, aes(x=albedo)) +
   geom_histogram(binwidth=0.5, fill="skyblue", color="black", alpha=0.7) +
@@ -109,39 +117,11 @@ grid.arrange(hist_plot, box_plot, ncol=2)
 ```
 
 
-
-```{r, echo=FALSE}
-# T-test for equal variances
-t_test_result <- t.test(albedo ~ species, data=data, var.equal=TRUE)
-
-# Calculate mean difference
-spotted_mean <- mean(subset(data, species == "Spotted")$albedo, na.rm=TRUE)
-striped_mean <- mean(subset(data, species == "Striped")$albedo, na.rm=TRUE)
-mean_difference <- spotted_mean - striped_mean
-
-# Extract relevant values and put into a data frame
-t_test_summary <- data.frame(
-  Statistic = round(t_test_result$statistic, 3),
-  df = t_test_result$parameter,
-  Mean_Difference = round(mean_difference, 3),
-  p_value = round(t_test_result$p.value, 3),
-  Lower_CI = round(t_test_result$conf.int[1], 3),
-  Upper_CI = round(t_test_result$conf.int[2], 3)
-)
-
-# Rename the row & columns
-rownames(t_test_summary)[rownames(t_test_summary) == "t"] <- "Spotted-Striped"
-colnames(t_test_summary)[colnames(t_test_summary) == "Mean_Difference"] <- "Mean Difference"
-colnames(t_test_summary)[colnames(t_test_summary) == "Lower_CI"] <- "95% Lower CI"
-colnames(t_test_summary)[colnames(t_test_summary) == "Upper_CI"] <- "95% Upper CI"
-
-# Display the summary table
-knitr::kable(t_test_summary, caption="T-test (Equal Variance) Summary Table", align='c')
-```
+Now, exploring for the possible relationship between weight and territory, we look into the scatterplots of the two variables. Referring from the figure below, the scatterplots of the weight and territory of all stoaches revealed that a linear relationship exist when stoaches are grouped by species as striped or spotted. Examining the scatterplots between weight and territory of spotted and striped stoaches, there seems to exist a linear pattern. 
 
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=3}
 
 #Relationship Between Weight and Territory
 
@@ -158,6 +138,8 @@ plot(spotted_data$weight, spotted_data$territory, main="Spotted Stoaches", xlab=
 plot(striped_data$weight, striped_data$territory, main="Striped Stoaches", xlab="Weight", ylab="Territory")
 ```
 
+Then , examining the residual and Q-Q plots of the striped and spotted stoaches, both groups do not exhibit no pattern in the residuals, thus a linear model is appropriate for the data. Also, the Q-Q plots for both groups exhibit a linear pattern indicating a normality in the dataset.
+Both assumptions of linearity and normality were satisfied, hence, a linear relationship can be further examined.
 
 
 ```{r, echo=FALSE}
@@ -191,15 +173,53 @@ plot(striped_data$weight, residuals_striped,
 abline(h=0, lty=2)
 
 # QQ plot for Spotted stoaches
-qqnorm(spotted_data$territory, main="QQ Plot for Spotted Stoaches", col="blue", pch=16)
+qqnorm(spotted_data$territory, main="Q-Q Plot for Spotted Stoaches", col="blue", pch=16)
 qqline(spotted_data$territory, col="red", lwd=2)
 
 # QQ plot for Striped stoaches
-qqnorm(striped_data$territory, main="QQ Plot for Striped Stoaches", col="green", pch=16)
+qqnorm(striped_data$territory, main="Q-Q Plot for Striped Stoaches", col="green", pch=16)
 qqline(striped_data$territory, col="red", lwd=2)
 ```
 
 
+
+## Analyses
+
+
+After satisfying the assumptions of normality and homogeneity of variances, the t-test for independent samples assuming euqal variances was used to answer the first research question whether there is a significant difference in the albedos between striped and spotted stoaches. The mean difference between spotted and striped stoaches is -0.179 implying that the mean albedos of striped stoaches is 0.179 higher than the mean albedos of spotted stoaches. With degree of freedom of 253 and t-value of -0.227, the t-test for independent samples with equal variances reported an insignificant p-value of 0.821 at 5% significance level. There is a sufficient evidence to not reject the null hypothesis and conclude that there is no significant difference in the mean albedos of striped and spotted roaches which is validated by the 95% confidence interval (-1.733,1.375) that included 0 in it. 
+
+
+```{r, echo=FALSE}
+# T-test for equal variances
+t_test_result <- t.test(albedo ~ species, data=data, var.equal=TRUE)
+
+# Calculate mean difference
+spotted_mean <- mean(subset(data, species == "Spotted")$albedo, na.rm=TRUE)
+striped_mean <- mean(subset(data, species == "Striped")$albedo, na.rm=TRUE)
+mean_difference <- spotted_mean - striped_mean
+
+# Extract relevant values and put into a data frame
+t_test_summary <- data.frame(
+  Mean_Difference = round(mean_difference, 3),
+  df = t_test_result$parameter,
+  Statistic = round(t_test_result$statistic, 3),
+  p_value = round(t_test_result$p.value, 3),
+  Lower_CI = round(t_test_result$conf.int[1], 3),
+  Upper_CI = round(t_test_result$conf.int[2], 3)
+)
+
+# Rename the row & columns
+rownames(t_test_summary)[rownames(t_test_summary) == "df"] <- "Spotted-Striped"
+colnames(t_test_summary)[colnames(t_test_summary) == "Mean_Difference"] <- "Mean Difference"
+colnames(t_test_summary)[colnames(t_test_summary) == "Lower_CI"] <- "95% Lower CI"
+colnames(t_test_summary)[colnames(t_test_summary) == "Upper_CI"] <- "95% Upper CI"
+
+# Display the summary table
+knitr::kable(t_test_summary, caption="T-test (Equal Variance) Summary Table", align='c')
+```
+
+
+Imploring the Linear Regression Method, the weight and territory of spotted and striped stoaches reported high ($r=0.76$) and very very high ($r=0.82$) positive correlation, respectively. When both correlation coefficient were subjected to hypothesis testing to check whether the relationship between weight and territory is significant, both groups yielded p-values (0.0000), signifying that the linear relationship is significant and the linear model is fit for predicting the response variable (territory occupied) using the predictor variable (weight). The coefficient of determination of the spotted and striped stoaches were $57.23%$ and $66.68$ percent (Table 3). These values imply that $42.77%$ and $33.31%$ of the variation in the territories occupied by spotted and striped sotaches, respectively, can be explained by other factors aside from the stoaches' weight.
 
 ```{r, echo=FALSE}
 # Run linear regression for Spotted stoaches
@@ -214,9 +234,6 @@ striped_summary <- summary(striped_lm)
 spotted_r <- cor(spotted_data$weight, spotted_data$territory)
 striped_r <- cor(striped_data$weight, striped_data$territory)
 
-# Calculate 1 - r^2
-spotted_1_minus_r_squared <- 1 - (spotted_r^2)
-striped_1_minus_r_squared <- 1 - (striped_r^2)
 
 # Extract relevant summary statistics
 summary_data <- data.frame(
@@ -224,7 +241,6 @@ summary_data <- data.frame(
   r = c(spotted_r, striped_r),
   R_Squared = c(spotted_summary$r.squared, striped_summary$r.squared),
   Adjusted_R_Squared = c(spotted_summary$adj.r.squared, striped_summary$adj.r.squared),
-  One_Minus_R_Squared = c(spotted_1_minus_r_squared, striped_1_minus_r_squared),
   F_Statistic = c(spotted_summary$fstatistic[1], striped_summary$fstatistic[1]),
   P_Value = c(pf(spotted_summary$fstatistic[1], df1 = spotted_summary$fstatistic[2], df2 = spotted_summary$fstatistic[3], lower.tail = FALSE),
               pf(striped_summary$fstatistic[1], df1 = striped_summary$fstatistic[2], df2 = striped_summary$fstatistic[3], lower.tail = FALSE))
@@ -232,13 +248,15 @@ summary_data <- data.frame(
 
 # Rename the Columns
 colnames(summary_data)[colnames(summary_data) == "P_Value"] <- "p-Value"
-colnames(summary_data)[colnames(summary_data) == "One_Minus_R_Squared"] <- "CoeffVar"
+
 
 # Create the summary table
 knitr::kable(summary_data, caption = "Test of Significance of the Correlation Coefficient for Spotted and Striped Stoaches", align = 'lcccc')
 ```
 
 
+
+Since a linear model is fit for the data set on the correlation between weight and territories occupied by spotted and striped stoaches, the slopes of the regression lines were computed and reported values of $\beta_1 = 0.024$ and $\beta_1 = 0.048$, respectively. Testing the significance of the slopes of the regression lines to predict territory occupied base on the weight of spotted and striped stoaches, both data sets reported significant p-values (0.000). These significant p-values imply that the both slopes from Table 4 are  significantly different from 0 and that the positive linear relationship between the weights and territories occupied by spotted and striped stoaches were validated. These results were also confirmed by the $95%$ confidence intervals for the slope $\beta_1$ which do not include 0 in the intervals for spotted (0.0201, 0.0273) and striped (0.0416, 0.0537) stoaches. 
 
 ```{r, echo=FALSE}
 # Extract intercepts from regression summaries
@@ -286,7 +304,7 @@ knitr::kable(slope_summary_data, caption = "Test of Significance of the Slope of
 
 
 
-\section {Conclusions and Further Discussion}
+\section {Conclusion}
 
 
 
@@ -301,23 +319,19 @@ knitr::kable(slope_summary_data, caption = "Test of Significance of the Slope of
 
 \section {Appendix}
 
-## Normality Test
+## Appendix 1: Normality Test
 
 ```{r, echo=FALSE}
 
 # Shapiro-Wilk Test for Normality of Data
 shapiro.test(data$albedo[data$species == "Spotted"])
 shapiro.test(data$albedo[data$species == "Striped"])
-shapiro.test(data$weight[data$species == "Spotted"])
-shapiro.test(data$weight[data$species == "Striped"])
-shapiro.test(data$territory[data$species == "Spotted"])
-shapiro.test(data$territory[data$species == "Striped"])
 
 ```
 
 
 
-## Equality of Variance Test
+## Appendix 2: Equality of Variance Test
 
 
 
@@ -330,7 +344,7 @@ leveneTest(albedo ~ species, data = data)
 
 
 
-## Computation for Correlation Coefficient
+## Appendix 3: Computation for Correlation Coefficient
 
 
 
