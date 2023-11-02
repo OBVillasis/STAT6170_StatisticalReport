@@ -304,6 +304,72 @@ knitr::kable(slope_summary_data, caption = "Test of Significance of the Slope of
 
 
 
+```{r, echo=FALSE}
+# Extract intercepts and slopes from regression summaries
+spotted_intercept <- coef(spotted_lm)["(Intercept)"]
+spotted_slope <- coef(spotted_lm)["weight"]
+
+striped_intercept <- coef(striped_lm)["(Intercept)"]
+striped_slope <- coef(striped_lm)["weight"]
+
+# Construct the regression equations as strings
+spotted_equation <- paste0("territory = ", round(spotted_intercept, 3), " + ", round(spotted_slope, 3), " * weight")
+striped_equation <- paste0("territory = ", round(striped_intercept, 3), " + ", round(striped_slope, 3), " * weight")
+
+# Create data frame for regression equations
+equation_data <- data.frame(
+  Species = c("Spotted", "Striped"),
+  Regression_Equation = c(spotted_equation, striped_equation)
+)
+
+# Rename the Column
+colnames(equation_data)[colnames(equation_data) == "Regression_Equation"] <- "Regression Equation"
+
+# Create the table using knitr::kable
+knitr::kable(equation_data, caption = "Regression Equations for Spotted and Striped Stoaches", align = 'lc')
+
+```
+
+
+
+```{r, echo=FALSE}
+# Set up a 1x2 plotting matrix
+par(mfrow=c(1,2))
+
+# Combine the two datasets into one for ggplot2
+combined_data <- rbind(
+  transform(spotted_data, Species = "Spotted"),
+  transform(striped_data, Species = "Striped")
+)
+
+# Function to add regression line and confidence interval
+add_regress_line_CI <- function(lm_model) {
+  weight_seq <- seq(min(combined_data$weight), max(combined_data$weight), length.out = 100)
+  pred <- predict(lm_model, newdata = data.frame(weight = weight_seq), interval = "confidence", level = 0.95)
+  
+  lines(weight_seq, pred[,"fit"], col = "red", lwd = 2)
+  lines(weight_seq, pred[,"lwr"], col = "blue", lty = 2)
+  lines(weight_seq, pred[,"upr"], col = "blue", lty = 2)
+}
+
+# Plot for Spotted species
+with(subset(combined_data, Species == "Spotted"), {
+  plot(weight, territory, main = "Spotted Stoaches", xlab = "Weight", ylab = "Territory", col = "gray", pch = 19)
+  add_regress_line_CI(spotted_lm)
+  legend("topright", legend = c("Regression Line", "95% CI"), lty = c(1, 2), lwd = 2, col = c("red", "blue"))
+})
+
+# Plot for Striped species
+with(subset(combined_data, Species == "Striped"), {
+  plot(weight, territory, main = "Striped Stoaches", xlab = "Weight", ylab = "Territory", col = "gray", pch = 19)
+  add_regress_line_CI(striped_lm)
+  legend("topright", legend = c("Regression Line", "95% CI"), lty = c(1, 2), lwd = 2, col = c("red", "blue"))
+})
+
+```
+
+
+
 \section {Conclusion}
 
 
