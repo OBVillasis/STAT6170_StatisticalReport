@@ -34,20 +34,39 @@ Adhering to the presumptions behind each statistical test run, we guarantee resu
 
 \section {Methods}
 
+This study uses a comparative-correlational design to test if there is a significant difference in the albedo of stiped and spotted stoaches and to check whether there is a significant linear relationship between the weight and the territory stoaches occupy.
 
+To test these hypotheses, a data from a random sample of 255 stoaches were collected and recorded in a spreadsheet. Their subject ID were recorded and species were classified as either spotted or striped. The body weight of each stoach (in lbs), its albedo - the proportion of light reflected to its surface, and the amount of territory controlled (unknown as to how it is measured) were recorded. 
 
+In testing significant differences in the mean albedo between spotted and striped stoaches, a preliminary data exploration was conducted. Stoaches were grouped as either striped and spotted, and the descriptive statistics were computed. The histogram and boxplot for each group were examined to ensure the assumptions of normality and homogeneity of variances are met. In addition, the Shapiro-wilk test and the Levene's test were done to check normality and homogeneity of variances assumptions, respectively. After the assumptions were satisfied, the t-test for independent samples for equal variances was used in testing whether the mean albedo of the spotted stoaches is significantly different from the mean albedo of striped stoaches. The 95% confidence intervals for the difference in the mean albedo between striped and spotted stoaches were computed to validate the results of the hypothesis testing.
+
+In testing whether there is a linear relationship between between the wieght of stoaches and the territory they occupy, a preliminary investigation was done. The scatterplots of the stoaches grouped as spotted or striped were investigated to check that there is a possible linear relationship between weight and territory. Model diagnostics were performed using the Residual vs fitted and Normal Q-Q plots to check linearity and normality of the dataset. After assumptions were satisfied, a hypothesis test for the slope of the regression line was conducted to check that the linear relationship between weight and territory is significant. Then, the Pearson-r correlation coefficient ($r$) and the coefficient of variation ($r^2$) were computed to see how weak or strong the linear relationship is and the percentage of the variation in the dependent variable that can be explained by the predictor variable. Finally, the equation of the regression line and the 95% confidence interval for the slope were computed to be used for prediction and to check how good the estimate for the slope is and counter-check the result of the hypothesis testing conducted for the slope of the regression line, respectively.
+
+All computations for the descriptive and inferential testing, including the mnodel diagnostircs were done using the R 4.3.2 software.
+
+ 
 \section {Results}
 
 ## Preliminary Data Exploration
 
 
 ```{r, echo=FALSE}
+#Import the data from Excel
+data <- read_csv("47826479_data_StatReport.csv")
+
+#Check the first few rows to ensure it's loaded correctly
+#head(data)
+
+#Separate the data by species
+spotted_data <- subset(data, species == "Spotted")
+striped_data <- subset(data, species == "Striped")
+
 #Relationship Between Weight and Territory
 
-# Plotting the relationship for Spotted stoaches
+#Plotting the relationship for Spotted stoaches
 plot(spotted_data$weight, spotted_data$territory, main="Spotted Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
 
-# Plotting the relationship for Striped stoaches
+#Plotting the relationship for Striped stoaches
 plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
 ```
 
@@ -65,18 +84,13 @@ plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight
 - Turner, M., & Smith, B. (2019). Weight and Territory: Insights into Ecological Balances. Journal of Animal Behavior, 7(4), 301-313.
 - Turner, M., & Wilson, H. (2017). Territory and Weight: The Balancing Act in the Animal Kingdom. Ecological Perspectives, 6(3), 112-120.
 
+\pagebreak
 
 \section {Appendix}
 
+## Normality Test
 
 ```{r, echo=FALSE}
-#Data Verification
-
-# Import the data from Excel
-data <- read_csv("47826479_data_StatReport.csv")
-
-# Check the first few rows to ensure it's loaded correctly
-head(data)
 
 # Shapiro-Wilk Test for Normality of Data
 shapiro.test(data$weight[data$species == "Spotted"])
@@ -84,21 +98,30 @@ shapiro.test(data$weight[data$species == "Striped"])
 shapiro.test(data$territory[data$species == "Spotted"])
 shapiro.test(data$territory[data$species == "Striped"])
 
-# Levene's Test for Homoscedasticity (Checking for Equal Variances)
-leveneTest(weight ~ species, data=data)
-leveneTest(territory ~ species, data=data)
-
-# 
 ```
 
 
 
-```{r, echo=FALSE}
-#Difference in Average Albedo
+## Equality of Variance Test
 
-# Separate the data by species
-spotted_data <- subset(data, species == "Spotted")
-striped_data <- subset(data, species == "Striped")
+
+
+```{r, echo=FALSE}
+
+# Levene's Test for Homoscedasticity (Checking for Equal Variances)
+leveneTest(weight ~ species, data=data)
+leveneTest(territory ~ species, data=data)
+
+```
+
+
+
+## Computation for Correlation Coefficient
+
+
+
+```{r, echo=FALSE}
+
 
 # Calculate the mean albedo for each species
 mean_albedo_spotted <- mean(spotted_data$albedo)
@@ -108,8 +131,8 @@ print(paste("Mean albedo of Spotted Stoaches: ", mean_albedo_spotted))
 print(paste("Mean albedo of Striped Stoaches: ", mean_albedo_striped))
 
 
-
 #Computation for Correlation
 cor.test(data$weight[data$species == "Spotted"], data$territory[data$species == "Spotted"])
 cor.test(data$weight[data$species == "Striped"], data$territory[data$species == "Striped"])
+
 ```
