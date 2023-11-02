@@ -40,6 +40,35 @@ Adhering to the presumptions behind each statistical test run, we guarantee resu
 
 ## Preliminary Data Exploration
 
+
+```{r, echo=FALSE}
+#Relationship Between Weight and Territory
+
+# Plotting the relationship for Spotted stoaches
+plot(spotted_data$weight, spotted_data$territory, main="Spotted Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
+
+# Plotting the relationship for Striped stoaches
+plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
+```
+
+
+
+\section {Conclusions and Further Discussion}
+
+
+
+\section {References}
+
+- Anderson, L., & Patel, N. (2020). Diversity in Patterns: A Comparative Study on Mammalian Markings. Journal of Biological Diversity, 28(3), 210-225.
+- Johnson, R., & Williams, A. (2018). The Patterned World of Stoaches: An Evolutionary Perspective. Ecology and Evolution Journal, 12(4), 345-356.
+- Robinson, H., & Lee, A. (2021). Evolving Patterns: The Adaptive Significance of Coloration in Mammals. Evolutionary Biology Reports, 12(1), 45-56.
+- Turner, M., & Smith, B. (2019). Weight and Territory: Insights into Ecological Balances. Journal of Animal Behavior, 7(4), 301-313.
+- Turner, M., & Wilson, H. (2017). Territory and Weight: The Balancing Act in the Animal Kingdom. Ecological Perspectives, 6(3), 112-120.
+
+
+\section {Appendix}
+
+
 ```{r, echo=FALSE}
 #Data Verification
 
@@ -62,7 +91,7 @@ leveneTest(territory ~ species, data=data)
 # 
 ```
 
-## Analyses
+
 
 ```{r, echo=FALSE}
 #Difference in Average Albedo
@@ -78,32 +107,9 @@ mean_albedo_striped <- mean(striped_data$albedo)
 print(paste("Mean albedo of Spotted Stoaches: ", mean_albedo_spotted))
 print(paste("Mean albedo of Striped Stoaches: ", mean_albedo_striped))
 
-#Relationship Between Weight and Territory
 
-# Plotting the relationship for Spotted stoaches
-plot(spotted_data$weight, spotted_data$territory, main="Spotted Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
-
-# Plotting the relationship for Striped stoaches
-plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
 
 #Computation for Correlation
 cor.test(data$weight[data$species == "Spotted"], data$territory[data$species == "Spotted"])
 cor.test(data$weight[data$species == "Striped"], data$territory[data$species == "Striped"])
 ```
-
-\section {Conclusions and Further Discussion}
-
-
-
-\section {References}
-
-- Anderson, L., & Patel, N. (2020). Diversity in Patterns: A Comparative Study on Mammalian Markings. Journal of Biological Diversity, 28(3), 210-225.
-- Johnson, R., & Williams, A. (2018). The Patterned World of Stoaches: An Evolutionary Perspective. Ecology and Evolution Journal, 12(4), 345-356.
-- Robinson, H., & Lee, A. (2021). Evolving Patterns: The Adaptive Significance of Coloration in Mammals. Evolutionary Biology Reports, 12(1), 45-56.
-- Turner, M., & Smith, B. (2019). Weight and Territory: Insights into Ecological Balances. Journal of Animal Behavior, 7(4), 301-313.
-- Turner, M., & Wilson, H. (2017). Territory and Weight: The Balancing Act in the Animal Kingdom. Ecological Perspectives, 6(3), 112-120.
-
-
-\section {Appendix}
-
-## Appendix
