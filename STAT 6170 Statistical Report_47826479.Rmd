@@ -70,6 +70,13 @@ plot(spotted_data$weight, spotted_data$territory, main="Spotted Stoaches: Weight
 plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
 ```
 
+## Descriptive Summary
+
+
+|   Data   |  N   |  Mean         |    SD         |    t   |  $p-value)$  |
+|:---------|-----:|--------------:|--------------:|-------:|-------------:|
+|  Striped |  *5* |  15703.5      |  3140.7       | 31.963 |  **0**       |
+|  Spotted |  56  |  5502.6       |    98.2607    |        |              |
 
 
 \section {Conclusions and Further Discussion}
@@ -84,7 +91,6 @@ plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight
 - Turner, M., & Smith, B. (2019). Weight and Territory: Insights into Ecological Balances. Journal of Animal Behavior, 7(4), 301-313.
 - Turner, M., & Wilson, H. (2017). Territory and Weight: The Balancing Act in the Animal Kingdom. Ecological Perspectives, 6(3), 112-120.
 
-\pagebreak
 
 \section {Appendix}
 
