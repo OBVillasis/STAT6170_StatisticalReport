@@ -11,9 +11,14 @@ author: "Osbert Bryan T. Villasis"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, 
                   message = FALSE, 
-                  warning = FALSE)
+                  warning = FALSE,
+                  fig.align = 'center')
 library(readr)
+library(dplyr)
+library(knitr)
 library(car)
+library(ggplot2)
+library(gridExtra)
 ```
 
 \section{Abstract}
@@ -54,29 +59,231 @@ All computations for the descriptive and inferential testing, including the mnod
 #Import the data from Excel
 data <- read_csv("47826479_data_StatReport.csv")
 
-#Check the first few rows to ensure it's loaded correctly
-#head(data)
-
 #Separate the data by species
 spotted_data <- subset(data, species == "Spotted")
 striped_data <- subset(data, species == "Striped")
+```
+
+
+
+```{r, echo=FALSE, results='asis'}
+#Descriptive Table
+summary_stats <- data %>%
+  group_by(species) %>%
+  summarise(
+    N = n(),
+    Mean = mean(albedo, na.rm = TRUE),
+    Median = median(albedo, na.rm = TRUE),
+    Min = min(albedo, na.rm = TRUE),
+    Max = max(albedo, na.rm = TRUE),
+    sd = sd(albedo, na.rm = TRUE),
+    Range = Max - Min
+  )
+
+knitr::kable(summary_stats, caption = "Descriptive Summary Table of Stoaches Grouped by Species")
+```
+
+
+
+```{r, echo=FALSE}
+# Assign the histogram to a variable
+hist_plot <- ggplot(data, aes(x=albedo)) +
+  geom_histogram(binwidth=0.5, fill="skyblue", color="black", alpha=0.7) +
+  theme_minimal() +
+  labs(title="Histogram of Albedo for Stoaches", 
+       x="Albedo", 
+       y="Frequency") +
+  facet_wrap(~species, ncol=2)
+
+# Assign the boxplot to a variable
+box_plot <- ggplot(data, aes(x=species, y=albedo, fill=species)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title="Boxplot of Albedo for Stoaches", 
+       x="Species", 
+       y="Albedo") +
+  scale_fill_manual(values=c("Spotted"="blue", "Striped"="green"))
+
+# grid.arrange() to place the plots side by side
+grid.arrange(hist_plot, box_plot, ncol=2)
+```
+
+
+
+```{r, echo=FALSE}
+# T-test for equal variances
+t_test_result <- t.test(albedo ~ species, data=data, var.equal=TRUE)
+
+# Calculate mean difference
+spotted_mean <- mean(subset(data, species == "Spotted")$albedo, na.rm=TRUE)
+striped_mean <- mean(subset(data, species == "Striped")$albedo, na.rm=TRUE)
+mean_difference <- spotted_mean - striped_mean
+
+# Extract relevant values and put into a data frame
+t_test_summary <- data.frame(
+  Statistic = round(t_test_result$statistic, 3),
+  df = t_test_result$parameter,
+  Mean_Difference = round(mean_difference, 3),
+  p_value = round(t_test_result$p.value, 3),
+  Lower_CI = round(t_test_result$conf.int[1], 3),
+  Upper_CI = round(t_test_result$conf.int[2], 3)
+)
+
+# Rename the row & columns
+rownames(t_test_summary)[rownames(t_test_summary) == "t"] <- "Spotted-Striped"
+colnames(t_test_summary)[colnames(t_test_summary) == "Mean_Difference"] <- "Mean Difference"
+colnames(t_test_summary)[colnames(t_test_summary) == "Lower_CI"] <- "95% Lower CI"
+colnames(t_test_summary)[colnames(t_test_summary) == "Upper_CI"] <- "95% Upper CI"
+
+# Display the summary table
+knitr::kable(t_test_summary, caption="T-test (Equal Variance) Summary Table", align='c')
+```
+
+
+
+```{r, echo=FALSE}
 
 #Relationship Between Weight and Territory
 
+# Setting the graphics parameters to have 1 row and 3 columns
+par(mfrow=c(1,3))
+
+#Plotting the relationship for Spotted & Striped stoaches
+plot(data$weight, data$territory, main="Spotted & Striped Stoaches", xlab="Weight", ylab="Territory")
+
 #Plotting the relationship for Spotted stoaches
-plot(spotted_data$weight, spotted_data$territory, main="Spotted Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
+plot(spotted_data$weight, spotted_data$territory, main="Spotted Stoaches", xlab="Weight", ylab="Territory")
 
 #Plotting the relationship for Striped stoaches
-plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight vs. Territory", xlab="Weight", ylab="Territory")
+plot(striped_data$weight, striped_data$territory, main="Striped Stoaches", xlab="Weight", ylab="Territory")
 ```
 
-## Descriptive Summary
 
 
-|   Data   |  N   |  Mean         |    SD         |    t   |  $p-value)$  |
-|:---------|-----:|--------------:|--------------:|-------:|-------------:|
-|  Striped |  *5* |  15703.5      |  3140.7       | 31.963 |  **0**       |
-|  Spotted |  56  |  5502.6       |    98.2607    |        |              |
+```{r, echo=FALSE}
+# Linear models for both Spotted and Striped stoaches
+lm_spotted <- lm(territory ~ weight, data=spotted_data)
+lm_striped <- lm(territory ~ weight, data=striped_data)
+
+# Residuals for both models
+residuals_spotted <- residuals(lm_spotted)
+residuals_striped <- residuals(lm_striped)
+
+# Set up the plotting layout
+par(mfrow=c(2,2))
+
+# Residual plot for Spotted stoaches
+plot(spotted_data$weight, residuals_spotted, 
+     main="Residuals for Spotted Stoaches",
+     xlab="Weight",
+     ylab="Residuals",
+     col="blue", pch=16)
+
+abline(h=0, lty=2)
+
+# Residual plot for Striped stoaches
+plot(striped_data$weight, residuals_striped, 
+     main="Residuals for Striped Stoaches",
+     xlab="Weight",
+     ylab="Residuals",
+     col="green", pch=16)
+
+abline(h=0, lty=2)
+
+# QQ plot for Spotted stoaches
+qqnorm(spotted_data$territory, main="QQ Plot for Spotted Stoaches", col="blue", pch=16)
+qqline(spotted_data$territory, col="red", lwd=2)
+
+# QQ plot for Striped stoaches
+qqnorm(striped_data$territory, main="QQ Plot for Striped Stoaches", col="green", pch=16)
+qqline(striped_data$territory, col="red", lwd=2)
+```
+
+
+
+```{r, echo=FALSE}
+# Run linear regression for Spotted stoaches
+spotted_lm <- lm(territory ~ weight, data=spotted_data)
+spotted_summary <- summary(spotted_lm)
+
+# Run linear regression for Striped stoaches
+striped_lm <- lm(territory ~ weight, data=striped_data)
+striped_summary <- summary(striped_lm)
+
+# Compute correlation coefficients for both species
+spotted_r <- cor(spotted_data$weight, spotted_data$territory)
+striped_r <- cor(striped_data$weight, striped_data$territory)
+
+# Calculate 1 - r^2
+spotted_1_minus_r_squared <- 1 - (spotted_r^2)
+striped_1_minus_r_squared <- 1 - (striped_r^2)
+
+# Extract relevant summary statistics
+summary_data <- data.frame(
+  Species = c("Spotted", "Striped"),
+  r = c(spotted_r, striped_r),
+  R_Squared = c(spotted_summary$r.squared, striped_summary$r.squared),
+  Adjusted_R_Squared = c(spotted_summary$adj.r.squared, striped_summary$adj.r.squared),
+  One_Minus_R_Squared = c(spotted_1_minus_r_squared, striped_1_minus_r_squared),
+  F_Statistic = c(spotted_summary$fstatistic[1], striped_summary$fstatistic[1]),
+  P_Value = c(pf(spotted_summary$fstatistic[1], df1 = spotted_summary$fstatistic[2], df2 = spotted_summary$fstatistic[3], lower.tail = FALSE),
+              pf(striped_summary$fstatistic[1], df1 = striped_summary$fstatistic[2], df2 = striped_summary$fstatistic[3], lower.tail = FALSE))
+)
+
+# Rename the Columns
+colnames(summary_data)[colnames(summary_data) == "P_Value"] <- "p-Value"
+colnames(summary_data)[colnames(summary_data) == "One_Minus_R_Squared"] <- "CoeffVar"
+
+# Create the summary table
+knitr::kable(summary_data, caption = "Test of Significance of the Correlation Coefficient for Spotted and Striped Stoaches", align = 'lcccc')
+```
+
+
+
+```{r, echo=FALSE}
+# Extract intercepts from regression summaries
+spotted_intercept <- coef(spotted_lm)["(Intercept)"]
+striped_intercept <- coef(striped_lm)["(Intercept)"]
+
+# Extract slopes (coefficients for 'weight') from regression summaries
+spotted_slope <- coef(spotted_lm)["weight"]
+striped_slope <- coef(striped_lm)["weight"]
+
+# Extract standard error, t-value, and p-value for each slope
+spotted_se <- sqrt(diag(vcov(spotted_lm)))["weight"]
+spotted_t <- spotted_slope/spotted_se
+spotted_p <- 2*pt(-abs(spotted_t), df = spotted_summary$df[2])
+
+striped_se <- sqrt(diag(vcov(striped_lm)))["weight"]
+striped_t <- striped_slope/striped_se
+striped_p <- 2*pt(-abs(striped_t), df = striped_summary$df[2])
+
+# Extract the 95% CI for the slope from both models
+spotted_ci <- confint(spotted_lm)["weight", ]
+striped_ci <- confint(striped_lm)["weight", ]
+
+# Create data frame for summary statistics of slopes
+slope_summary_data <- data.frame(
+  Species = c("Spotted", "Striped"),
+  Slope = c(spotted_slope, striped_slope),
+  Intercept = c(spotted_intercept, striped_intercept),
+  Std_Error = c(spotted_se, striped_se),
+  t_value = c(spotted_t, striped_t),
+  P_Value = c(spotted_p, striped_p),
+  CI_Lower = c(spotted_ci[1], striped_ci[1]),
+  CI_Upper = c(spotted_ci[2], striped_ci[2])
+)
+
+# Rename the Columns
+colnames(slope_summary_data)[colnames(slope_summary_data) == "P_Value"] <- "p-Value"
+colnames(slope_summary_data)[colnames(slope_summary_data) == "Std_Error"] <- "Std Error"
+colnames(slope_summary_data)[colnames(slope_summary_data) == "CI_Lower"] <- "95% Lower CI"
+colnames(slope_summary_data)[colnames(slope_summary_data) == "CI_Upper"] <- "95% Upper CI"
+
+# Create the summary table
+knitr::kable(slope_summary_data, caption = "Test of Significance of the Slope of the Regression Line of Spotted and Striped Stoaches", align = 'lccccccc')
+```
+
 
 
 \section {Conclusions and Further Discussion}
@@ -99,6 +306,8 @@ plot(striped_data$weight, striped_data$territory, main="Striped Stoaches: Weight
 ```{r, echo=FALSE}
 
 # Shapiro-Wilk Test for Normality of Data
+shapiro.test(data$albedo[data$species == "Spotted"])
+shapiro.test(data$albedo[data$species == "Striped"])
 shapiro.test(data$weight[data$species == "Spotted"])
 shapiro.test(data$weight[data$species == "Striped"])
 shapiro.test(data$territory[data$species == "Spotted"])
@@ -115,8 +324,7 @@ shapiro.test(data$territory[data$species == "Striped"])
 ```{r, echo=FALSE}
 
 # Levene's Test for Homoscedasticity (Checking for Equal Variances)
-leveneTest(weight ~ species, data=data)
-leveneTest(territory ~ species, data=data)
+leveneTest(albedo ~ species, data = data)
 
 ```
 
@@ -127,15 +335,6 @@ leveneTest(territory ~ species, data=data)
 
 
 ```{r, echo=FALSE}
-
-
-# Calculate the mean albedo for each species
-mean_albedo_spotted <- mean(spotted_data$albedo)
-mean_albedo_striped <- mean(striped_data$albedo)
-
-print(paste("Mean albedo of Spotted Stoaches: ", mean_albedo_spotted))
-print(paste("Mean albedo of Striped Stoaches: ", mean_albedo_striped))
-
 
 #Computation for Correlation
 cor.test(data$weight[data$species == "Spotted"], data$territory[data$species == "Spotted"])
