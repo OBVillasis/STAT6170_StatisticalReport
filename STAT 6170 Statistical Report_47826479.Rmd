@@ -302,6 +302,7 @@ colnames(slope_summary_data)[colnames(slope_summary_data) == "CI_Upper"] <- "95%
 knitr::kable(slope_summary_data, caption = "Test of Significance of the Slope of the Regression Line of Spotted and Striped Stoaches", align = 'lccccccc')
 ```
 
+Using the computed slopes and intercepts for the spotted and striped stoaches, we get the best of line fit or the regression lines to be $y=13.342 + 0.024x$ and $y=16.132 + 0.044x$, respectively. Fro mthe regression equations, for every unit increase in weight, there is 0.024 units increase in the territory occupied of spotted stoaches. On the other hand, for striped stoaches,  for every unit increase in weight, there is 0.048 units increase in the territory occupied
 
 
 ```{r, echo=FALSE}
@@ -329,6 +330,9 @@ colnames(equation_data)[colnames(equation_data) == "Regression_Equation"] <- "Re
 knitr::kable(equation_data, caption = "Regression Equations for Spotted and Striped Stoaches", align = 'lc')
 
 ```
+
+
+From the regression equations or the lines of best fit (in red lines), we computed the 95% confidence intervals for the prediction values (in blue broken lines) and fitted with the data set between weight and territory for both spotted and striped stoaches as shown in the figure below. 
 
 
 
@@ -372,6 +376,7 @@ with(subset(combined_data, Species == "Striped"), {
 
 \section {Conclusion}
 
+Based on the comprehensive analysis and data exploration conducted in this study, we can conclusively state that there is no significant difference in the average albedo of spotted stoaches compared to striped stoaches. This suggests that albedo, as a distinguishing characteristic, does not provide a clear differentiation between the two species. Furthermore, our findings affirm a notable positive correlation between the weight of stoaches and the territory they inhabit. This relationship underscores the potential influence of a stoach's weight on its territorial dominance or preferences. The development of two distinct regression lines for spotted and striped stoaches offers a valuable tool for future predictions and insights regarding territory occupation based on weight. This research not only contributes to our understanding of stoach behavior and characteristics but also offers a foundation for future studies aiming to delve deeper into the intricacies of these species' habitats and interactions.
 
 
 \section {References}
